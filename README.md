@@ -25,7 +25,7 @@
 ### Сборка и установка
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/yourusername/conf.git
+git clone https://github.com/KONOVALOVda/conf.git
 cd conf
 
 # Вариант 1: Использование Python версии
