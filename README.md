@@ -19,7 +19,8 @@
 ## 🚀 Установка BASH версии
 
 ```bash
-#после скачивания conf.sh
+git clone https://github.com/KONOVALOVda/conf.git
+cd conf
 mv ./conf.sh ./conf
 sudo chmod +x conf
 sudo cp conf /usr/local/bin/
@@ -57,7 +58,6 @@ conf --help
 git clone https://github.com/KONOVALOVda/conf.git
 cd conf
 
-# Вариант 1: Использование Python версии
 chmod +x conf.py
 sudo cp conf.py /usr/local/bin/conf
 ```
@@ -96,7 +96,10 @@ conf --help
 # Клонировать репозиторий
 git clone https://github.com/KONOVALOVda/conf.git
 cd conf
-g++ -std=c++11 -o conf conf.cpp
+g++ -std=c++11 -o confcpp conf.cpp
+chmod +x confcpp
+sudo cp confcpp /usr/local/bin/conf
+conf --help
 ```
 
 ## 🛠 Использование C++ версии
