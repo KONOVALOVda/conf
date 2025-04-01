@@ -29,6 +29,12 @@ by Konovalov Denis where.adm@gmail.com
 
 Пример:
   conf /etc/conf.conf 'web=1' 'web=2'
+  
+Установка:
+mv ./conf.sh ./conf
+sudo chmod +x conf
+sudo cp conf /usr/local/bin/
+conf --help
 
 Примечания:
   - Используйте одинарные кавычки для спецсимволов
