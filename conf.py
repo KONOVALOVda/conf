@@ -1,125 +1,82 @@
 #!/usr/bin/env python3
 import sys
-import os
-import shutil
 import re
+import os
 
-VERSION = "1.0"
-AUTHOR = "Коновалов Денис Александрович. where.adm@gmail.com"
+def show_help():
+    help_text = f"""
+Usage: {sys.argv[0]} [--help] <file_path> <search_text> <replace_text>
+Replace text in a file using Python's re module
 
-def print_help():
-    print("""conf - утилита для изменения параметров в конфигурационных файлах
+Arguments:
+  file_path     Path to target file
+  search_text   Text pattern to search (regex compatible)
+  replace_text  Replacement text (regex compatible)
 
-Использование:
-  conf /path/to/file.conf "old_param:new_param"
-  conf /path/to/file.conf "param1:value1" "param2:value2"
-  conf /path/to/file.conf "old1:new1"; "old2:new2"
+Example:
+  {sys.argv[0]} /etc/conf.conf 'web=1' 'web=2'
 
-Опции:
-  --help    - показать эту справку
-  --version - показать версию программы
+Note:
+  - Use quotes for arguments with special characters
+  - Backup file before replacement
+  - This script uses Python's regex engine
+
+by Коновалов Денис where.adm@gmail.com
+---------------------------------------
+
+Использование: {sys.argv[0]} <файл> <что заменить> <на что заменить>
+Замена текста в файле с использованием модуля re Python
+
+Аргументы:
+  файл         Путь к целевому файлу
+  искать       Шаблон для поиска (совместим с регулярными выражениями)
+  заменить     Текст замены (совместим с регулярными выраженияниями)
 
 Пример:
-  conf /etc/nginx.conf "worker_processes:2" "worker_processes:4"
+  {sys.argv[0]} /etc/conf.conf 'web=1' 'web=2'
 
-Создатель - """ + AUTHOR)
+Примечания:
+  - Используйте кавычки для аргументов со спецсимволами
+  - Сделайте резервную копию файла перед заменой
+  - Скрипт использует regex engine Python
+by Коновалов Денис where.adm@gmail.com
+"""
+    print(help_text)
 
-def print_version():
-    print(f"conf version {VERSION}")
-
-def process_replacements(file_path, replacements):
-    # Проверка существования файла
+def change_text(file_path, search_pattern, replace_text):
     if not os.path.isfile(file_path):
-        print(f"Ошибка: файл '{file_path}' не существует", file=sys.stderr)
-        return False
+        print(f"Ошибка: Файл {file_path} не найден!", file=sys.stderr)
+        sys.exit(2)
     
-    # Проверка прав на запись
-    if not os.access(file_path, os.W_OK):
-        print(f"Ошибка: нет прав на запись в файл '{file_path}'", file=sys.stderr)
-        return False
-    
-    # Создание backup копии
-    backup_path = file_path + ".bak"
     try:
-        shutil.copy2(file_path, backup_path)
+        with open(file_path, 'r') as file:
+            content = file.read()
+        
+        try:
+            new_content = re.sub(search_pattern, replace_text, content)
+        except re.error as e:
+            print(f"Ошибка регулярного выражения: {e}", file=sys.stderr)
+            sys.exit(5)
+        
+        with open(file_path, 'w') as file:
+            file.write(new_content)
+        
+        print(f"Замена успешно выполнена в файле {file_path}")
     except IOError as e:
-        print(f"Ошибка при создании backup файла: {e}", file=sys.stderr)
-        return False
-    
-    # Чтение и обработка файла
-    try:
-        with open(file_path, 'r') as f:
-            lines = f.readlines()
-        
-        modified = False
-        new_lines = []
-        
-        for line in lines:
-            new_line = line
-            # Пропускаем комментарии
-            if not line.strip().startswith('#'):
-                for old, new in replacements:
-                    # Ищем точное совпадение (с учетом пробелов вокруг)
-                    pattern = re.compile(r'(^|\s)' + re.escape(old) + r'(\s|$)')
-                    if pattern.search(new_line):
-                        new_line = pattern.sub(r'\1' + new + r'\2', new_line)
-                        modified = True
-            new_lines.append(new_line)
-        
-        if not modified:
-            print("Предупреждение: не было сделано ни одной замены", file=sys.stderr)
-            return True
-        
-        # Запись измененного файла
-        with open(file_path, 'w') as f:
-            f.writelines(new_lines)
-            
-    except IOError as e:
-        print(f"Ошибка при обработке файла: {e}", file=sys.stderr)
-        return False
-    
-    return True
-
-def parse_replacements(args):
-    replacements = []
-    for arg in args:
-        # Поддержка разделения через точку с запятой
-        parts = arg.split(';')
-        for part in parts:
-            part = part.strip()
-            if not part:
-                continue
-            if ':' not in part:
-                print(f"Ошибка: некорректный формат замены '{part}'", file=sys.stderr)
-                return None
-            old, new = part.split(':', 1)
-            replacements.append((old.strip(), new.strip()))
-    return replacements
-
-def main():
-    if len(sys.argv) == 1 or '--help' in sys.argv:
-        print_help()
-        return
-    
-    if '--version' in sys.argv:
-        print_version()
-        return
-    
-    file_path = sys.argv[1]
-    if not os.path.isfile(file_path):
-        print(f"Ошибка: файл '{file_path}' не существует", file=sys.stderr)
-        sys.exit(1)
-    
-    replacements = parse_replacements(sys.argv[2:])
-    if replacements is None:
-        sys.exit(1)
-    
-    if not replacements:
-        print("Ошибка: не указаны замены", file=sys.stderr)
-        sys.exit(1)
-    
-    if not process_replacements(file_path, replacements):
-        sys.exit(1)
+        print(f"Ошибка ввода-вывода: {e.strerror}", file=sys.stderr)
+        sys.exit(3)
+    except Exception as e:
+        print(f"Ошибка: {str(e)}", file=sys.stderr)
+        sys.exit(3)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) == 2 and sys.argv[1] == "--help":
+        show_help()
+        sys.exit(0)
+    
+    if len(sys.argv) != 4:
+        print("Ошибка: Неверное количество аргументов!", file=sys.stderr)
+        show_help()
+        sys.exit(1)
+    
+    change_text(sys.argv[1], sys.argv[2], sys.argv[3])
