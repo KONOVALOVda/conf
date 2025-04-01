@@ -50,14 +50,6 @@ conf /путь/к/файлу.conf "старое_значение:новое_зн
 ```
 
 
-Массовое изменение
-```bash
-conf /путь/к/файлу.conf "param1:value1" "param2:value2"
-conf /путь/к/файлу.conf "old1:new1"; "old2:new2"
-
-```
-
-
 Получение справки:
 ```bash
 conf --help
