@@ -96,8 +96,7 @@ conf --help
 # Клонировать репозиторий
 git clone https://github.com/KONOVALOVda/conf.git
 cd conf
-make
-sudo make install
+g++ -std=c++11 -o conf conf.cpp
 ```
 
 ## 🛠 Использование C++ версии
